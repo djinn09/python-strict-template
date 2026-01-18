@@ -102,6 +102,7 @@ select = [
     "ASYNC", # flake8-async
     "ANN",   # flake8-annotations
     "FBT",   # flake8-boolean-trap
+    "D",     # pydocstyle
 ]
 ignore = [
     "E501",   # line too long (handled by formatter)
@@ -117,6 +118,9 @@ max-complexity = 10
 [tool.ruff.lint.pylint]
 max-nested-blocks = 3
 
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
 [tool.ruff.lint.per-file-ignores]
 "src/**/*.py" = [
     "TCH", # beartype needs types at runtime
@@ -128,6 +132,7 @@ max-nested-blocks = 3
     "ANN",     # don't require annotations in tests
     "FBT",     # allow boolean args in tests
     "PLR6301", # allow methods that don't use self
+    "D",       # allow informal docstrings in tests
 ]
 
 [tool.ruff.format]
@@ -327,15 +332,16 @@ typecheck = { sequence = [
 typecheck-basedpyright = { cmd = "basedpyright --level error", help = "Run BasedPyright" }
 typecheck-ty = { cmd = "ty check .", help = "Run ty" }
 
-# --- SECURITY ---
 security = { sequence = [
     "security-bandit",
     "security-semgrep",
     "security-audit",
+    "security-secrets",
 ], help = "Run all security scans" }
 security-bandit = { cmd = "bandit -r src/ -c pyproject.toml", help = "Run Bandit" }
-security-semgrep = { shell = "set PYTHONUTF8=1 && semgrep scan --config auto --error", help = "Run Semgrep" }
+security-semgrep = { shell = "set PYTHONUTF8=1 && semgrep scan --config auto --config .semgrep/ --error", help = "Run Semgrep" }
 security-audit = { cmd = "pip-audit", help = "Audit dependencies" }
+security-secrets = { cmd = "detect-secrets scan --all-files --exclude-files '(.venv|uv.lock|.ruff_cache|.pytest_cache|.*\\.egg-info|build|dist)'", help = "Scan for secrets" }
 
 # --- TESTING ---
 test = { cmd = "pytest --cov=src --cov-report=term-missing", help = "Run tests with coverage" }

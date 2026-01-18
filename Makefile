@@ -25,7 +25,7 @@ typecheck: ## Run all type checkers (BasedPyright + ty)
 	uv run poe typecheck
 
 # --- SECURITY ---
-security: ## Run all security scans (Bandit + Semgrep + Audit)
+security: ## Run all security scans (Bandit + Semgrep + Audit + Secrets)
 	uv run poe security
 
 # --- TESTING ---

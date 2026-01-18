@@ -1,0 +1,49 @@
+rules:
+  - id: google-style-class-docstring-missing
+    languages: [python]
+    message: "Class is missing a docstring. Professional code should document class responsibility."
+    severity: WARNING
+    patterns:
+      - pattern: |
+          class $CLASS:
+            ...
+      - pattern-not: |
+          class $CLASS:
+            """$DOC"""
+            ...
+      - pattern-not: |
+          class $CLASS(...):
+            """$DOC"""
+            ...
+
+  - id: google-style-args-missing
+    languages: [python]
+    message: "Function with parameters is missing an 'Args:' section in its docstring. LLMs often hallucinate parameters without documenting them."
+    severity: ERROR
+    patterns:
+      - pattern: |
+          def $FUNC(..., $ARG, ...):
+              """$DOC"""
+              ...
+      - metavariable-regex:
+          metavariable: $DOC
+          regex: "(?s)^(?!.*Args:).*"
+      - metavariable-comparison:
+          metavariable: $ARG
+          comparison: "str($ARG) not in ['self', 'cls']"
+
+  - id: google-style-returns-missing
+    languages: [python]
+    message: "Function with return type is missing a 'Returns:' section in its docstring."
+    severity: ERROR
+    patterns:
+      - pattern: |
+          def $FUNC(...) -> $RET:
+              """$DOC"""
+              ...
+      - metavariable-regex:
+          metavariable: $DOC
+          regex: "(?s)^(?!.*Returns:).*"
+      - metavariable-comparison:
+          metavariable: $RET
+          comparison: "str($RET) not in ['None', 'NoneType']"

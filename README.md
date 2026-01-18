@@ -44,7 +44,7 @@ poe typecheck # Run BasedPyright + ty
 
 ### Security & Testing
 
-poe security # Run Bandit + Semgrep + Pip-Audit
+poe security # Run Bandit + Semgrep + Pip-Audit + Secrets
 poe test # Run tests with coverage
 
 ### Full Suite
