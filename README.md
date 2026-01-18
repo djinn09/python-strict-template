@@ -14,53 +14,50 @@ uv sync --all-extras
 uv run prek install  # Install git hooks (Rust-based, fast!)
 
 # Run all checks
-uv run poe check
+uv run poe quality
 ```
 
 ## Toolchain
 
-| Layer        | Tool                                                                                        | Purpose                                           |
-| ------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **Linting**  | [Ruff](https://docs.astral.sh/ruff/)                                                        | Ultra-fast linter + formatter (replaces 8+ tools) |
-| **Types**    | [BasedPyright](https://docs.basedpyright.com/)                                              | Strict static type checking                       |
-| **Security** | [Bandit](https://bandit.readthedocs.io/) + [pip-audit](https://pypi.org/project/pip-audit/) | Security analysis & CVE scanning                  |
-| **Quality**  | [PyScn](https://github.com/j178/pyscn) + [Vulture](https://github.com/jendrikseipp/vulture) | Quality scan + Dead code detection                |
-| **Testing**  | [Pytest](https://pytest.org/) + [Hypothesis](https://hypothesis.readthedocs.io/)            | Unit + property-based testing                     |
-| **Runtime**  | [Pydantic](https://docs.pydantic.dev/) + [Beartype](https://beartype.readthedocs.io/)       | Data validation + type checking                   |
-| **CI**       | [prek](https://github.com/j178/prek)                                                        | Rust-based pre-commit runner (faster)             |
+| Layer          | Tool                                                                                                 | Purpose                                           |
+| -------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| **Hygiene**    | [Ruff](https://docs.astral.sh/ruff/)                                                                 | Ultra-fast linter + formatter (Google Docstrings) |
+| **Types**      | [BasedPyright](https://docs.basedpyright.com/) + [ty](https://github.com/astral-sh/ty)               | God-Mode type checking                            |
+| **Security**   | [Bandit](https://bandit.readthedocs.io/) + [Semgrep](https://semgrep.dev/)                           | Security analysis & Advanced rules                |
+| **Monitoring** | [pip-audit](https://pypi.org/project/pip-audit/) + [Secrets](https://github.com/Yelp/detect-secrets) | CVE scanning & Secret detection                   |
+| **Quality**    | [PyScn](https://github.com/j178/pyscn) + [Vulture](https://github.com/jendrikseipp/vulture)          | Quality scan + Dead code detection                |
+| **Testing**    | [Pytest](https://pytest.org/) + [Hypothesis](https://hypothesis.readthedocs.io/)                     | Unit + property-based testing                     |
+| **Runtime**    | [Pydantic](https://docs.pydantic.dev/) + [Beartype](https://beartype.readthedocs.io/)                | Data validation + type checking                   |
 
 ## Available Commands
 
 Use **Poe the Poet** (`poe`) for all tasks:
 
-### Hygiene
+### Hygiene & Formatting
 
-poe format # Format code and fix linting issues
-poe lint # Run linter (check only)
+- `poe format`: Formats code and fixes linting issues.
+- `poe lint`: Checks code without modifying.
 
 ### Type Checking
 
-poe typecheck # Run BasedPyright + ty
+- `poe typecheck`: Runs both BasedPyright and `ty`.
 
-### Security & Testing
+### Security & Compliance
 
-poe security # Run Bandit + Semgrep + Pip-Audit + Secrets
-poe test # Run tests with coverage
+- `poe security`: Runs Bandit, Semgrep (Local + Auto), Pip-Audit, and Secrets scan.
+- `poe test`: Runs unit tests with coverage.
 
-### Full Suite
+### Full Quality Assurance
 
-poe quality # Run EVERYTHING (The ultimate check)
+- `poe quality`: The ultimate check. Runs hygiene, types, security, testing, and quality tools in sequence.
 
-# Cleanup
-
-poe clean # Remove build artifacts
-
-> **Tip**: Run `poe --help` to see all available tasks with descriptions.
+> **Tip**: Run `poe --help` to see all available tasks with detailed descriptions.
 
 ## Project Structure
 
 ```
 python-strict-template/
+├── .semgrep/             # Custom security & docstring rules
 ├── src/
 │   ├── __init__.py       # Package init
 │   ├── py.typed          # PEP 561 typed marker
@@ -76,13 +73,13 @@ python-strict-template/
 
 ## Why This Toolchain?
 
-LLM-generated code often has:
+LLM-generated code often has common "slop" patterns that this toolchain is designed to catch:
 
-- [x] Type mismatches -> **Mypy + Beartype** catch them
-- [x] Security vulnerabilities -> **Bandit + pip-audit** detect them
-- [x] Edge case bugs -> **Hypothesis** finds them
-- [x] Invalid data assumptions -> **Pydantic** validates at runtime
-- [x] Hardcoded secrets -> **detect-secrets** blocks commits
+- [x] **Type mismatches** -> BasedPyright God-Mode + Beartype catch them.
+- [x] **Vague Docstrings** -> Ruff + Custom Semgrep rules enforce Google-style `Args:` and `Returns:`.
+- [x] **Security vulnerabilities** -> Bandit + Semgrep detect them.
+- [x] **Edge case bugs** -> Hypothesis finds them through property testing.
+- [x] **Hardcoded secrets** -> detect-secrets blocks them before they reach Git.
 
 This template turns:
 
@@ -128,10 +125,10 @@ def test_sum_always_works(numbers):
     assert result == sum(numbers)
 ```
 
-## 📦 Requirements
+## Requirements
 
 - **Python 3.12+**
-- **[UV](https://docs.astral.sh/uv/)** - Install with `pip install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **[UV](https://docs.astral.sh/uv/)**
 
 ## 📄 License
 
