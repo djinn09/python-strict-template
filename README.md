@@ -1,8 +1,8 @@
-# Python Strict Template 🛡️
+# Python Strict Template
 
 A comprehensive Python project template with a **curated safety toolchain** for protecting LLM-generated code.
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone and enter
@@ -17,7 +17,7 @@ uv run prek install  # Install git hooks (Rust-based, fast!)
 uv run poe check
 ```
 
-## 🧰 Toolchain
+## Toolchain
 
 | Layer        | Tool                                                                                        | Purpose                                           |
 | ------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -29,38 +29,35 @@ uv run poe check
 | **Runtime**  | [Pydantic](https://docs.pydantic.dev/) + [Beartype](https://beartype.readthedocs.io/)       | Data validation + type checking                   |
 | **CI**       | [prek](https://github.com/j178/prek)                                                        | Rust-based pre-commit runner (faster)             |
 
-## 📋 Available Commands
+## Available Commands
 
 Use **Poe the Poet** (`poe`) for all tasks:
 
-```bash
-# Setup
-poe setup         # Full project setup (install + pre-commit)
+### Hygiene
 
-# Code Quality
-poe lint          # Run ruff check
-poe format        # Run ruff format
-poe typecheck     # Run strict type checking (BasedPyright)
+poe format # Format code and fix linting issues
+poe lint # Run linter (check only)
 
-# Testing
-poe test          # Run tests with coverage
+### Type Checking
 
-# Security & Quality
-poe security      # Run bandit, audit, dead-code, quality
-poe dead-code     # Find unused code (vulture)
-poe quality       # Run deep quality scan (pyscn)
+poe typecheck # Run BasedPyright + ty
 
-# Combined
-poe check         # Run ALL checks (CI simulation)
-```
+### Security & Testing
+
+poe security # Run Bandit + Semgrep + Pip-Audit
+poe test # Run tests with coverage
+
+### Full Suite
+
+poe quality # Run EVERYTHING (The ultimate check)
 
 # Cleanup
 
 poe clean # Remove build artifacts
 
-> 💡 **Tip**: Run `poe --help` to see all available tasks with descriptions.
+> **Tip**: Run `poe --help` to see all available tasks with descriptions.
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 python-strict-template/
@@ -77,15 +74,15 @@ python-strict-template/
 └── README.md
 ```
 
-## 🔒 Why This Toolchain?
+## Why This Toolchain?
 
 LLM-generated code often has:
 
-- ❌ Type mismatches → **Mypy + Beartype** catch them
-- ❌ Security vulnerabilities → **Bandit + pip-audit** detect them
-- ❌ Edge case bugs → **Hypothesis** finds them
-- ❌ Invalid data assumptions → **Pydantic** validates at runtime
-- ❌ Hardcoded secrets → **detect-secrets** blocks commits
+- [x] Type mismatches -> **Mypy + Beartype** catch them
+- [x] Security vulnerabilities -> **Bandit + pip-audit** detect them
+- [x] Edge case bugs -> **Hypothesis** finds them
+- [x] Invalid data assumptions -> **Pydantic** validates at runtime
+- [x] Hardcoded secrets -> **detect-secrets** blocks commits
 
 This template turns:
 
@@ -93,17 +90,17 @@ This template turns:
 Unsafe LLM Code → Verified, Typed, Secured Code
 ```
 
-## 🎯 Example Usage
+## Example Usage
 
 ### Pydantic Model Validation
 
 ```python
 from src.example import User, UserRole
 
-# ✅ Valid - works
+# [PASSED] Valid - works
 user = User(id=1, name="Alice", email="alice@example.com")
 
-# ❌ Invalid email - raises ValidationError immediately
+# [FAILED] Invalid email - raises ValidationError immediately
 user = User(id=1, name="Alice", email="not-an-email")
 ```
 
@@ -112,10 +109,10 @@ user = User(id=1, name="Alice", email="not-an-email")
 ```python
 from src.example import calculate_sum
 
-# ✅ Valid - works
+# [PASSED] Valid - works
 calculate_sum([1, 2, 3])  # Returns 6.0
 
-# ❌ Wrong type - raises BeartypeCallHintException
+# [FAILED] Wrong type - raises BeartypeCallHintException
 calculate_sum(["1", "2", "3"])  # LLMs often make this mistake!
 ```
 

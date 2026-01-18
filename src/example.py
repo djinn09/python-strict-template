@@ -10,8 +10,8 @@ This module shows how to use:
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import datetime
+from enum import Enum, StrEnum
 
 from beartype import beartype
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -21,7 +21,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 # =============================================================================
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     """User roles in the system."""
 
     ADMIN = "admin"

@@ -37,6 +37,8 @@ dev = [
     "basedpyright>=1.37.1",
     "vulture>=2.14",
     "pyscn",
+    "ty",
+    "gitingest",
 ]
 
 [build-system]
@@ -53,57 +55,79 @@ packages = ["src"]
 target-version = "py312"
 line-length = 88
 src = ["src", "tests"]
+preview = true           # Enable preview rules
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "F",    # pyflakes
-    "I",    # isort
-    "B",    # flake8-bugbear
-    "C4",   # flake8-comprehensions
-    "UP",   # pyupgrade
-    "ARG",  # flake8-unused-arguments
-    "SIM",  # flake8-simplify
-    "TCH",  # flake8-type-checking
-    "PTH",  # flake8-use-pathlib
-    "ERA",  # eradicate (commented code)
-    "PL",   # pylint
-    "RUF",  # ruff-specific
-    "S",    # flake8-bandit (security)
-    "A",    # flake8-builtins
-    "COM",  # flake8-commas
-    "DTZ",  # flake8-datetimez
-    "T10",  # flake8-debugger
-    "EXE",  # flake8-executable
-    "ISC",  # flake8-implicit-str-concat
-    "ICN",  # flake8-import-conventions
-    "LOG",  # flake8-logging
-    "G",    # flake8-logging-format
-    "PIE",  # flake8-pie
-    "PYI",  # flake8-pyi
-    "Q",    # flake8-quotes
-    "RSE",  # flake8-raise
-    "RET",  # flake8-return
-    "SLF",  # flake8-self
-    "SLOT", # flake8-slots
-    "TID",  # flake8-tidy-imports
-    "INT",  # flake8-gettext
-    "FLY",  # flynt
-    "PERF", # perflint
-    "FURB", # refurb
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "B",     # flake8-bugbear
+    "BLE",   # flake8-blind-except
+    "C4",    # flake8-comprehensions
+    "C90",   # mccabe complexity
+    "UP",    # pyupgrade
+    "ARG",   # flake8-unused-arguments
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "PTH",   # flake8-use-pathlib
+    "ERA",   # eradicate (commented code)
+    "PL",    # pylint
+    "RUF",   # ruff-specific
+    "S",     # flake8-bandit (security)
+    "A",     # flake8-builtins
+    "COM",   # flake8-commas
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "T20",   # flake8-print
+    "EXE",   # flake8-executable
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "LOG",   # flake8-logging
+    "G",     # flake8-logging-format
+    "PIE",   # flake8-pie
+    "PYI",   # flake8-pyi
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SLOT",  # flake8-slots
+    "TID",   # flake8-tidy-imports
+    "INT",   # flake8-gettext
+    "FLY",   # flynt
+    "PERF",  # perflint
+    "FURB",  # refurb
+    "N",     # pep8-naming
+    "ASYNC", # flake8-async
+    "ANN",   # flake8-annotations
+    "FBT",   # flake8-boolean-trap
 ]
 ignore = [
     "E501",   # line too long (handled by formatter)
     "COM812", # trailing comma (conflicts with formatter)
     "ISC001", # implicit string concat (conflicts with formatter)
+    "S603",   # subprocess without shell=True (too strict)
+    "S607",   # process with partial path (too strict)
 ]
 
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-nested-blocks = 3
+
 [tool.ruff.lint.per-file-ignores]
+"src/**/*.py" = [
+    "TCH", # beartype needs types at runtime
+]
 "tests/**/*.py" = [
     "S101",    # allow assert in tests
     "ARG",     # allow unused arguments in fixtures
     "PLR2004", # allow magic values in tests
+    "ANN",     # don't require annotations in tests
+    "FBT",     # allow boolean args in tests
+    "PLR6301", # allow methods that don't use self
 ]
 
 [tool.ruff.format]
@@ -120,7 +144,13 @@ line-ending = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
-addopts = ["-v", "--tb=short", "--strict-markers", "--strict-config"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--strict-config",
+    "-W error",
+]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
@@ -166,7 +196,106 @@ skips = ["B101"]                  # allow assert in non-test code if needed
 # BASED-PYRIGHT - Strict type checking
 # ============================================================================
 [tool.basedpyright]
-typeCheckingMode = "standard"
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+reportMissingImports = true
+reportMissingTypeStubs = true
+reportUndefinedVariable = true
+reportAssertAlwaysTrue = true
+reportInvalidStringEscapeSequence = true
+
+# ============================================================
+reportOptionalSubscript = true
+reportOptionalMemberAccess = true
+reportOptionalCall = true
+reportOptionalIterable = true
+reportOptionalContextManager = true
+reportOptionalOperand = true
+reportAny = true
+reportExplicitAny = true
+reportIgnoreCommentWithoutRule = false
+reportPrivateLocalImportUsage = true
+
+# ============================================================
+reportMissingParameterType = true
+reportMissingTypeArgument = true
+reportUnknownParameterType = true
+reportUnknownLambdaType = true
+reportUnknownArgumentType = true
+reportUnknownVariableType = true
+reportUnknownMemberType = true
+reportUntypedFunctionDecorator = true
+reportUntypedClassDecorator = true
+reportUntypedBaseClass = true
+reportUntypedNamedTuple = true
+
+# ============================================================
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+reportInconsistentConstructor = true
+reportUninitializedInstanceVariable = true
+reportOverlappingOverload = true
+reportMissingSuperCall = true
+
+# ============================================================
+reportPrivateUsage = true
+reportConstantRedefinition = true
+reportInvalidStubStatement = true
+reportIncompleteStub = true
+reportUnsupportedDunderAll = true
+reportUnusedClass = "error"
+reportUnusedFunction = "error"
+reportUnusedVariable = "error"
+reportUnusedImport = "error"
+reportDuplicateImport = "error"
+
+# ============================================================
+reportUnnecessaryIsInstance = "error"
+reportUnnecessaryCast = "error"
+reportUnnecessaryComparison = "error"
+reportUnnecessaryContains = "error"
+reportUnnecessaryTypeIgnoreComment = "error"
+
+# ============================================================
+reportGeneralTypeIssues = true
+reportPropertyTypeMismatch = true
+reportFunctionMemberAccess = true
+reportCallInDefaultInitializer = true
+reportImplicitStringConcatenation = true
+
+# ============================================================
+reportImplicitOverride = true
+reportDeprecated = "warning"
+
+# ============================================================
+reportImportCycles = "warning"
+
+# ============================================================
+exclude = [
+    "**/__pycache__",
+    "**/node_modules",
+    ".git",
+    ".mypy_cache",
+    ".pyright_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+    ".venv",
+    "venv",
+    "env",
+    "logs",
+    "output",
+    "data",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+executionEnvironments = [
+    { root = "tests", reportUnknownArgumentType = "none", reportUnknownVariableType = "none", reportUnknownMemberType = "none", reportAny = "none", reportExplicitAny = "none", reportUntypedFunctionDecorator = "none", reportUntypedClassDecorator = "none", reportUntypedBaseClass = "none" },
+]
+
+venvPath = "."
+venv = ".venv"
 
 
 # ============================================================================
@@ -181,54 +310,50 @@ typeCheckingMode = "standard"
 default_task_type = "cmd"
 
 [tool.poe.tasks]
-# Installation & Setup
+# --- HYGIENE ---
+format = { sequence = [
+    { cmd = "ruff format ." },
+    { cmd = "ruff check . --fix" },
+], help = "Format code and fix linting issues" }
+
+lint = { cmd = "ruff check .", help = "Run linter (check only)" }
+lint-unsafe = { cmd = "ruff check . --fix --unsafe-fixes", help = "Lint with unsafe fixes" }
+
+# --- TYPE CHECKING ---
+typecheck = { sequence = [
+    "typecheck-basedpyright",
+    "typecheck-ty",
+], help = "Run all type checkers" }
+typecheck-basedpyright = { cmd = "basedpyright --level error", help = "Run BasedPyright" }
+typecheck-ty = { cmd = "ty check .", help = "Run ty" }
+
+# --- SECURITY ---
+security = { sequence = [
+    "security-bandit",
+    "security-semgrep",
+    "security-audit",
+], help = "Run all security scans" }
+security-bandit = { cmd = "bandit -r src/ -c pyproject.toml", help = "Run Bandit" }
+security-semgrep = { shell = "set PYTHONUTF8=1 && semgrep scan --config auto --error", help = "Run Semgrep" }
+security-audit = { cmd = "pip-audit", help = "Audit dependencies" }
+
+# --- TESTING ---
+test = { cmd = "pytest --cov=src --cov-report=term-missing", help = "Run tests with coverage" }
+test-fast = { cmd = "pytest", help = "Run tests without coverage" }
+
+# --- FULL QUALITY ASSURANCE ---
+quality = { sequence = [
+    "format",
+    "typecheck",
+    "security",
+    { cmd = "pyscn check ." },
+    { cmd = "vulture src/ --min-confidence 60" },
+], help = "Run FULL quality suite" }
+
+# --- SETUP & MAINTENANCE ---
 install = { cmd = "uv sync --all-extras", help = "Install all dependencies" }
 setup = { sequence = [
     "install",
-    "pre-commit-install",
+    { cmd = "prek install" },
 ], help = "Full project setup" }
-pre-commit-install = { cmd = "pre-commit install", help = "Install pre-commit hooks" }
-
-# Linting & Formatting
-lint = { cmd = "ruff check src/ tests/", help = "Run linter" }
-lint-fix = { cmd = "ruff check src/ tests/ --fix", help = "Run linter with auto-fix" }
-format = { cmd = "ruff format src/ tests/", help = "Format code" }
-format-check = { cmd = "ruff format --check src/ tests/", help = "Check formatting" }
-
-# Type Checking
-typecheck = { cmd = "basedpyright", help = "Run strict type checking with BasedPyright" }
-
-# Testing
-test = { cmd = "pytest --cov=src --cov-report=term-missing", help = "Run tests with coverage" }
-test-fast = { cmd = "pytest", help = "Run tests without coverage" }
-test-html = { cmd = "pytest --cov=src --cov-report=html", help = "Generate HTML coverage report" }
-
-# Security & Quality
-bandit = { cmd = "bandit -r src/ -c pyproject.toml", help = "Run Bandit security linter" }
-audit = { cmd = "pip-audit", help = "Audit dependencies for CVEs" }
-dead-code = { cmd = "vulture src/ --min-confidence 60", help = "Find dead code" }
-quality = { cmd = "pyscn check .", help = "Run quality scan" }
-security = { sequence = [
-    "bandit",
-    "audit",
-    "dead-code",
-    "quality",
-], help = "Run all security/quality checks" }
-
-# Combined Checks
-check = { sequence = [
-    "lint-fix",
-    "format",
-    "typecheck",
-    "test",
-    "security",
-], help = "Run ALL checks (CI simulation)" }
-ci = { sequence = [
-    "lint",
-    "format-check",
-    "typecheck",
-    "test",
-], help = "CI pipeline checks" }
-
-# Cleanup
 clean = { shell = "rm -rf build/ dist/ *.egg-info .pytest_cache .ruff_cache htmlcov .coverage", help = "Clean build artifacts" }
