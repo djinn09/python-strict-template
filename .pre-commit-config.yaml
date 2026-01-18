@@ -1,0 +1,94 @@
+# Organized Pre-commit Configuration
+# Run `uv run prek auto-update` periodically to update hook versions
+
+default_stages: [commit]
+
+repos:
+  # --- Standard Hygiene ---
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: requirements-txt-fixer
+      - id: detect-private-key
+      - id: pretty-format-json
+        args: [--autofix, --indent=4, --no-sort-keys]
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        args:
+          ["--ignore-words-list=nd,ot,tt", "--skip=./.venv,./uv.lock,./.git"]
+        exclude: ^uv\.lock$
+
+  # --- Dependency Management (uv) ---
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.26
+    hooks:
+      - id: uv-lock
+      - id: uv-export
+        name: Export requirements.txt
+        args: ["--output-file", "requirements.txt", "--no-hashes"]
+      - id: uv-export
+        name: Export requirements-dev.txt
+        args: ["--extra", "dev", "--output-file", "requirements-dev.txt"]
+
+  # ==========================================================================
+  # Ruff - Linting & Formatting
+  # ==========================================================================
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.13
+    hooks:
+      - id: ruff-format
+        name: ruff-format (commit)
+      - id: ruff
+        name: ruff check --fix (commit)
+        args: ["--fix"]
+
+  # --- Security & Quality (local) ---
+  - repo: local
+    hooks:
+      - id: basedpyright
+        name: basedpyright strict type-check (push)
+        entry: uv run basedpyright --level error
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [push]
+
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.10.0
+    hooks:
+      - id: pip-audit
+        args: ["--requirement", "requirements.txt"]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.9.2
+    hooks:
+      - id: bandit
+        args: ["-r", "src/", "-ll"]
+
+  - repo: local
+    hooks:
+      - id: vulture
+        name: vulture dead code detection
+        entry: uv run vulture src/ --min-confidence 60
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: pyscn
+        name: pyscn quality scan
+        entry: uv run pyscn check .
+        language: system
+        types: [python]
+        pass_filenames: false
