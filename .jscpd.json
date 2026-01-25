@@ -1,0 +1,27 @@
+{
+    "threshold": 3,
+    "reporters": [
+        "console"
+    ],
+    "ignore": [
+        "**/.venv/**",
+        "**/node_modules/**",
+        "**/.git/**",
+        "**/__pycache__/**",
+        "**/build/**",
+        "**/dist/**",
+        "**/*.egg-info/**",
+        "**/htmlcov/**",
+        "**/.pytest_cache/**",
+        "**/.ruff_cache/**",
+        "**/uv.lock",
+        "**/requirements*.txt",
+        "**/vulture_whitelist.py"
+    ],
+    "format": [
+        "python"
+    ],
+    "minLines": 5,
+    "minTokens": 50,
+    "absolute": true
+}

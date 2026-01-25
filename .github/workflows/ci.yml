@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  quality:
+    name: Quality Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Format check
+        run: uv run ruff format . --check
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Type check (BasedPyright)
+        run: uv run basedpyright --level error
+
+      - name: Type check (ty)
+        run: uv run ty check .
+
+      - name: Security (Bandit)
+        run: uv run bandit -r src/ -c pyproject.toml
+
+      - name: Security (pip-audit)
+        run: uv run pip-audit
+
+      - name: Dead code (Vulture)
+        run: uv run vulture src/ --min-confidence 60
+
+      - name: Dead code (pyscn)
+        run: uv run pyscn check .
+
+      - name: Duplicate code (pylint R0801)
+        run: uv run pylint src/ --exit-zero
+
+      - name: Duplicate code (jscpd)
+        run: npx jscpd .
+
+  semgrep:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: semgrep scan --config auto --config .semgrep/ --error
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run tests
+        run: uv run pytest --cov=src --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false

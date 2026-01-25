@@ -130,6 +130,10 @@ def test_sum_always_works(numbers):
 - **Python 3.12+**
 - **[UV](https://docs.astral.sh/uv/)**
 
+## Cross-Platform Support
+
+This template is designed to be fully cross-platform (Windows, Linux, macOS). All tasks defined in `pyproject.toml` use cross-platform commands or Python scripts to ensure consistent behavior across different operating systems.
+
 ## 📄 License
 
 MIT

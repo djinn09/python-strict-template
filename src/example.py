@@ -69,7 +69,14 @@ class User(BaseModel):
     @field_validator("name")
     @classmethod
     def name_must_not_be_empty(cls, v: str) -> str:
-        """Validate that name is not just whitespace."""
+        """Validate that name is not just whitespace.
+
+        Args:
+            v: The name to validate.
+
+        Returns:
+            The stripped name if valid.
+        """
         if not v.strip():
             msg = "Name cannot be empty or whitespace"
             raise ValueError(msg)

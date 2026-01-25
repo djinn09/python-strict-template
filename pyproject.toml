@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Developer" }]
 keywords = ["python", "template", "llm", "safety", "toolchain"]
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
@@ -39,6 +40,9 @@ dev = [
     "pyscn",
     "ty",
     "gitingest",
+
+    # Duplication Detection
+    "pylint>=3.3.0",
 ]
 
 [build-system]
@@ -55,7 +59,8 @@ packages = ["src"]
 target-version = "py312"
 line-length = 88
 src = ["src", "tests"]
-preview = true           # Enable preview rules
+exclude = ["vulture_whitelist.py"]
+preview = true                     # Enable preview rules
 
 [tool.ruff.lint]
 select = [
@@ -277,6 +282,7 @@ reportImportCycles = "warning"
 
 # ============================================================
 exclude = [
+    "vulture_whitelist.py",
     "**/__pycache__",
     "**/node_modules",
     ".git",
@@ -302,6 +308,24 @@ executionEnvironments = [
 venvPath = "."
 venv = ".venv"
 
+
+# ============================================================================
+# PYLINT - Duplicate code detection (R0801)
+# ============================================================================
+[tool.pylint.main]
+ignore = [".venv", "tests", "vulture_whitelist.py"]
+jobs = 0                                            # Auto-detect CPU count
+
+[tool.pylint."messages control"]
+disable = "all"
+enable = "R0801" # duplicate-code only
+
+[tool.pylint.similarities]
+min-similarity-lines = 5
+ignore-comments = true
+ignore-docstrings = true
+ignore-imports = true
+ignore-signatures = true
 
 # ============================================================================
 # DETECT-SECRETS - Secrets detection
@@ -339,7 +363,7 @@ security = { sequence = [
     "security-secrets",
 ], help = "Run all security scans" }
 security-bandit = { cmd = "bandit -r src/ -c pyproject.toml", help = "Run Bandit" }
-security-semgrep = { shell = "set PYTHONUTF8=1 && semgrep scan --config auto --config .semgrep/ --error", help = "Run Semgrep" }
+security-semgrep = { cmd = "semgrep scan --config auto --config .semgrep/ --error", env = { PYTHONUTF8 = "1" }, help = "Run Semgrep" }
 security-audit = { cmd = "pip-audit", help = "Audit dependencies" }
 security-secrets = { cmd = "detect-secrets scan --all-files --exclude-files '(.venv|uv.lock|.ruff_cache|.pytest_cache|.*\\.egg-info|build|dist)'", help = "Scan for secrets" }
 
@@ -347,11 +371,20 @@ security-secrets = { cmd = "detect-secrets scan --all-files --exclude-files '(.v
 test = { cmd = "pytest --cov=src --cov-report=term-missing", help = "Run tests with coverage" }
 test-fast = { cmd = "pytest", help = "Run tests without coverage" }
 
+# --- DUPLICATION DETECTION ---
+duplicate = { sequence = [
+    "duplicate-pylint",
+    "duplicate-jscpd",
+], help = "Run all duplication checks" }
+duplicate-pylint = { cmd = "pylint src/ --exit-zero", help = "Pylint R0801 duplicate detection" }
+duplicate-jscpd = { cmd = "python scripts/jscpd.py", help = "jscpd token-based clone detection" }
+
 # --- FULL QUALITY ASSURANCE ---
 quality = { sequence = [
     "format",
     "typecheck",
     "security",
+    "duplicate",
     { cmd = "pyscn check ." },
     { cmd = "vulture src/ --min-confidence 60" },
 ], help = "Run FULL quality suite" }
@@ -362,4 +395,4 @@ setup = { sequence = [
     "install",
     { cmd = "prek install" },
 ], help = "Full project setup" }
-clean = { shell = "rm -rf build/ dist/ *.egg-info .pytest_cache .ruff_cache htmlcov .coverage", help = "Clean build artifacts" }
+clean = { cmd = "python scripts/clean.py", help = "Clean build artifacts" }

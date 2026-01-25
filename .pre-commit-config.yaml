@@ -27,7 +27,10 @@ repos:
     hooks:
       - id: codespell
         args:
-          ["--ignore-words-list=nd,ot,tt", "--skip=./.venv,./uv.lock,./.git"]
+          [
+            "--ignore-words-list=nd,ot,tt,astroid",
+            "--skip=./.venv,./uv.lock,./.git",
+          ]
         exclude: ^uv\.lock$
 
   # --- Dependency Management (uv) ---
